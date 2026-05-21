@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>健身记录</title>
+<meta name="theme-color" content="#121212">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="健身记录">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <style>
 /* ===== Theme Variables ===== */
 :root, [data-theme="green"] {
@@ -2012,6 +2018,14 @@ button, .cal-day, .nav-item, .part-option, .type-option {
 
   init();
 })();
+</script>
+<script>
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(function(reg) { console.log('[PWA] Service Worker registered:', reg.scope); })
+    .catch(function(err) { console.log('[PWA] Service Worker registration failed:', err); });
+}
 </script>
 </body>
 </html>
