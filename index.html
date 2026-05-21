@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="green">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>健身记录</title>
+<style>
+/* ===== Theme Variables ===== */
+:root, [data-theme="green"] {
+  --bg: #121212;
+  --card: #1e1e1e;
+  --card-hover: #2a2a2a;
+  --accent: #a4e44e;
+  --accent-rgb: 164,228,78;
+  --text: #fff;
+  --text-secondary: #999;
+  --nav-bg: #1a1a1a;
+  --nav-border: #2a2a2a;
+  --border: #444;
+  --input-bg: #2a2a2a;
+  --green: #4CAF50;
+  --blue: #2196F3;
+  --danger: #e53935;
+  --radius: 14px;
+  --nav-height: 64px;
+}
+
+[data-theme="blue"] {
+  --bg: #0d1b2a;
+  --card: #152238;
+  --card-hover: #1e3050;
+  --accent: #4ea5e4;
+  --accent-rgb: 78,165,228;
+  --text: #e8e8e8;
+  --text-secondary: #8899aa;
+  --nav-bg: #0f1c2e;
+  --nav-border: #1e3050;
+  --border: #3a5068;
+  --input-bg: #1a2d44;
+  --green: #4CAF50;
+  --blue: #64b5f6;
+  --danger: #e53935;
+}
+
+[data-theme="purple"] {
+  --bg: #1a1025;
+  --card: #261d3a;
+  --card-hover: #332850;
+  --accent: #b388ff;
+  --accent-rgb: 179,136,255;
+  --text: #ede7f6;
+  --text-secondary: #9988aa;
+  --nav-bg: #1c1228;
+  --nav-border: #332850;
+  --border: #4a3a5a;
+  --input-bg: #2d2240;
+  --green: #66bb6a;
+  --blue: #7c9eff;
+  --danger: #ef5350;
+}
+
+[data-theme="red"] {
+  --bg: #1a1010;
+  --card: #2a1a1a;
+  --card-hover: #3a2525;
+  --accent: #ef5350;
+  --accent-rgb: 239,83,80;
+  --text: #ffe8e8;
+  --text-secondary: #aa8888;
+  --nav-bg: #1c1212;
+  --nav-border: #3a2525;
+  --border: #4a2a2a;
+  --input-bg: #302020;
+  --green: #4CAF50;
+  --blue: #42a5f5;
+  --danger: #ff7043;
+}
+
+[data-theme="gold"] {
+  --bg: #0d0d0d;
+  --card: #1a1a1a;
+  --card-hover: #2a2520;
+  --accent: #ffd700;
+  --accent-rgb: 255,215,0;
+  --text: #f5f0e0;
+  --text-secondary: #998866;
+  --nav-bg: #121212;
+  --nav-border: #2a2520;
+  --border: #3a3520;
+  --input-bg: #222018;
+  --green: #66bb6a;
+  --blue: #42a5f5;
+  --danger: #ef5350;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 20px);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* iOS tap delay fix */
+button, .cal-day, .nav-item, .part-option, .type-option {
+  touch-action: manipulation;
+}
+
+/* ===== Splash Screen ===== */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+#splash.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.splash-icon {
+  font-size: 72px;
+  animation: splashPulse 1s ease-in-out infinite;
+  margin-bottom: 20px;
+}
+@keyframes splashPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+.splash-title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--text);
+}
+.splash-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 10px;
+  letter-spacing: 1px;
+}
+
+/* ===== Header ===== */
+.header {
+  padding: 20px 16px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.header .date-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+.icon-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--card);
+  color: var(--text);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn:active { background: var(--card-hover); }
+
+/* ===== Views ===== */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ===== Today Tab ===== */
+.today-date {
+  text-align: center;
+  padding: 8px 0 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.completed-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  margin: 0 16px 16px;
+  background: rgba(76,175,80,0.15);
+  border: 1px solid rgba(76,175,80,0.3);
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.exercise-list { padding: 0 16px; }
+.exercise-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: transform 0.15s;
+}
+.exercise-card:active { transform: scale(0.98); }
+
+.part-badge {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.part-badge img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.exercise-info { flex: 1; min-width: 0; }
+.exercise-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.exercise-detail {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.exercise-del {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.exercise-del:active { color: var(--danger); }
+
+/* ===== Rest Time Row ===== */
+.rest-row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+.rest-label { white-space: nowrap; font-size: 12px; }
+.rest-input {
+  width: 44px;
+  padding: 5px 2px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 12px;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+  -webkit-appearance: none;
+}
+.rest-input::-webkit-outer-spin-button,
+.rest-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.rest-input:focus { border-color: var(--accent); }
+.rest-set-num { font-size: 10px; color: var(--text-secondary); white-space: nowrap; }
+.rest-unit { font-size: 11px; color: var(--text-secondary); }
+
+/* ===== Cardio Card ===== */
+.exercise-card.cardio .part-badge {
+  background: rgba(33,150,243,0.2) !important;
+  color: #64b5f6 !important;
+}
+
+/* ===== Add Button ===== */
+.add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 14px;
+  margin: 4px 0 16px;
+  border: 2px dashed var(--card-hover);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.add-btn:active { border-color: var(--accent); color: var(--accent); }
+
+.complete-btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 20px 16px;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.complete-btn:active { opacity: 0.8; }
+.complete-btn:disabled {
+  background: var(--card-hover);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+/* ===== Calendar Tab ===== */
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 16px;
+}
+.cal-nav .month-label { font-size: 18px; font-weight: 600; }
+.cal-nav button {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--card);
+  color: var(--text);
+  font-size: 18px;
+  cursor: pointer;
+}
+.cal-nav button:active { background: var(--card-hover); }
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0 8px 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  background: transparent;
+  border: none;
+  color: var(--text);
+}
+.cal-day:active { transform: scale(0.9); }
+.cal-day.empty { cursor: default; }
+.cal-day.trained { background: rgba(76,175,80,0.3); color: var(--green); }
+.cal-day.planned { background: rgba(33,150,243,0.3); color: var(--blue); }
+.cal-day.rest { color: var(--text-secondary); }
+.cal-day.today {
+  border: 2px solid var(--text);
+  font-weight: 700;
+}
+.cal-day.today.trained { border-color: var(--green); }
+.cal-day.today.planned { border-color: var(--blue); }
+.cal-day.today.rest { border-color: var(--text-secondary); }
+
+.cal-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.cal-legend span { display: flex; align-items: center; gap: 6px; }
+.cal-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.cal-dot.green { background: var(--green); }
+.cal-dot.blue { background: var(--blue); }
+.cal-dot.gray { background: var(--border); }
+
+/* ===== Stats Tab ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px 12px;
+  text-align: center;
+}
+.stat-num {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+}
+.stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+
+.week-overview {
+  margin: 0 16px;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.week-overview h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--text-secondary); }
+.week-row { display: flex; justify-content: space-between; }
+.week-day { text-align: center; flex: 1; }
+.week-day .day-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; }
+.week-day .day-icon { font-size: 20px; }
+
+/* ===== Cardio Stats ===== */
+.cardio-stats {
+  margin: 16px;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.cardio-stats h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--text-secondary); }
+.cardio-stat-row { display: flex; justify-content: space-around; text-align: center; }
+.cardio-stat-item .cs-val { font-size: 24px; font-weight: 700; color: #64b5f6; }
+.cardio-stat-item .cs-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+/* ===== Theme Section ===== */
+.theme-section {
+  margin: 0 16px 16px;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.theme-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--text-secondary); }
+.theme-dots { display: flex; gap: 16px; justify-content: center; }
+.theme-dot {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.theme-dot:active { transform: scale(0.9); }
+.theme-dot.active { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg); }
+.theme-dot::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.theme-dot.active::after { opacity: 1; }
+
+/* ===== Bottom Nav ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  height: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--nav-bg);
+  border-top: 1px solid var(--nav-border);
+  display: flex;
+  z-index: 100;
+}
+.nav-item {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item .nav-icon { font-size: 20px; }
+.nav-item.active { color: var(--accent); }
+
+/* ===== Bottom Sheet ===== */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.sheet-overlay.open { display: block; opacity: 1; }
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border-radius: 18px 18px 0 0;
+  z-index: 201;
+  padding: 8px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 85vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.sheet.open { transform: translateX(-50%) translateY(0); }
+.sheet-handle {
+  width: 32px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.sheet h2 { font-size: 18px; font-weight: 700; margin-bottom: 18px; text-align: center; }
+
+/* ===== Type Toggle ===== */
+.type-toggle { display: flex; gap: 8px; margin-bottom: 18px; }
+.type-option {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.type-option.active {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb),0.1);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ===== Photo Upload ===== */
+.photo-area {
+  margin-top: 4px;
+  margin-bottom: 14px;
+}
+.photo-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  justify-content: center;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.photo-btn:active { border-color: var(--accent); color: var(--accent); }
+.photo-preview {
+  display: none;
+  margin-top: 10px;
+  position: relative;
+  text-align: center;
+}
+.photo-preview img {
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.photo-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--danger);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.photo-indicator {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--accent);
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: calc(100% - 40px);
+  max-width: 380px;
+  max-height: 75vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.modal h3 { font-size: 16px; margin-bottom: 14px; }
+.modal .modal-exercise {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--nav-border);
+  font-size: 14px;
+}
+.modal .modal-exercise:last-child { border-bottom: none; }
+.modal .modal-exercise-name { font-weight: 600; margin-bottom: 2px; }
+.modal .modal-exercise-detail { font-size: 12px; color: var(--text-secondary); }
+.modal .modal-exercise-img {
+  width: 60px; height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-top: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+.modal .modal-empty { text-align: center; color: var(--text-secondary); padding: 20px 0; }
+.modal-close {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--card-hover);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ===== Image Fullscreen ===== */
+.img-fullscreen {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.img-fullscreen.open { display: flex; }
+.img-fullscreen img {
+  max-width: 95%;
+  max-height: 90vh;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+/* ===== Form Elements ===== */
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+.part-select { display: flex; flex-wrap: wrap; gap: 8px; }
+.part-option {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.part-option.selected { border-color: currentColor; background: rgba(255,255,255,0.08); }
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.form-input:focus { border-color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.form-row .form-input { text-align: center; }
+.form-row.two-col { grid-template-columns: 1fr 1fr; }
+.form-submit {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #000;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== Data Management ===== */
+.data-section {
+  margin: 0 16px 16px;
+  padding: 16px;
+  background: var(--card);
+  border-radius: var(--radius);
+}
+.data-section h3 { font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; }
+.data-btns { display: flex; gap: 10px; }
+.data-btn {
+  flex: 1;
+  padding: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.data-btn:active { border-color: var(--accent); }
+.data-btn.primary {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120px);
+  background: #333;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 14px;
+  z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ===== Plan banner ===== */
+.plan-banner {
+  margin: 0 16px 12px;
+  padding: 12px 16px;
+  background: rgba(33,150,243,0.12);
+  border: 1px solid rgba(33,150,243,0.25);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div id="splash">
+  <div class="splash-icon">💪</div>
+  <div class="splash-title">健身记录</div>
+  <div class="splash-sub">记录每一次进步</div>
+</div>
+
+<div class="header">
+  <div>
+    <h1>训练</h1>
+    <div class="date-sub" id="headerDate"></div>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" id="btnExport" title="导出数据">⬇</button>
+    <button class="icon-btn" id="btnImport" title="导入数据">⬆</button>
+  </div>
+</div>
+
+<!-- Today View -->
+<div class="view active" id="viewToday">
+  <div class="today-date" id="todayDate"></div>
+  <div class="plan-banner" id="planBanner" style="display:none">📋 已加载今日训练计划</div>
+  <div class="completed-badge" id="completedBadge" style="display:none">✅ 今日训练已完成</div>
+  <div class="exercise-list" id="exerciseList"></div>
+  <button class="add-btn" id="btnAdd">＋ 添加动作</button>
+  <button class="complete-btn" id="btnComplete">完成训练</button>
+</div>
+
+<!-- Calendar View -->
+<div class="view" id="viewCalendar">
+  <div class="cal-nav">
+    <button id="calPrev">‹</button>
+    <div class="month-label" id="calLabel"></div>
+    <button id="calNext">›</button>
+  </div>
+  <div class="weekdays">
+    <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <div class="cal-legend">
+    <span><span class="cal-dot green"></span>已训练</span>
+    <span><span class="cal-dot blue"></span>有计划</span>
+    <span><span class="cal-dot gray"></span>休息</span>
+  </div>
+</div>
+
+<!-- Stats View -->
+<div class="view" id="viewStats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">累计训练天</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statMonth">0</div>
+      <div class="stat-label">本月训练天</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statStreak">0</div>
+      <div class="stat-label">连续训练天</div>
+    </div>
+  </div>
+  <div class="week-overview">
+    <h3>本周训练概览</h3>
+    <div class="week-row" id="weekRow"></div>
+  </div>
+  <div class="cardio-stats">
+    <h3>本月有氧统计</h3>
+    <div class="cardio-stat-row">
+      <div class="cardio-stat-item">
+        <div class="cs-val" id="cardioCount">0</div>
+        <div class="cs-label">有氧次数</div>
+      </div>
+      <div class="cardio-stat-item">
+        <div class="cs-val" id="cardioDuration">0</div>
+        <div class="cs-label">总时长(分钟)</div>
+      </div>
+      <div class="cardio-stat-item">
+        <div class="cs-val" id="cardioDistance">0</div>
+        <div class="cs-label">总距离(km)</div>
+      </div>
+    </div>
+  </div>
+  <div class="theme-section">
+    <h3>主题色</h3>
+    <div class="theme-dots" id="themeDots">
+      <button class="theme-dot active" data-theme="green" style="background:#a4e44e" title="深绿"></button>
+      <button class="theme-dot" data-theme="blue" style="background:#4ea5e4" title="深蓝"></button>
+      <button class="theme-dot" data-theme="purple" style="background:#b388ff" title="深紫"></button>
+      <button class="theme-dot" data-theme="red" style="background:#ef5350" title="暗红"></button>
+      <button class="theme-dot" data-theme="gold" style="background:#ffd700" title="黑金"></button>
+    </div>
+  </div>
+  <div class="data-section">
+    <h3>数据备份</h3>
+    <div class="data-btns">
+      <button class="data-btn primary" id="btnExport2">导出 JSON</button>
+      <button class="data-btn" id="btnImport2">导入 JSON</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-view="viewToday">
+    <span class="nav-icon">📋</span><span>今日</span>
+  </button>
+  <button class="nav-item" data-view="viewCalendar">
+    <span class="nav-icon">📅</span><span>日历</span>
+  </button>
+  <button class="nav-item" data-view="viewStats">
+    <span class="nav-icon">📊</span><span>统计</span>
+  </button>
+</nav>
+
+<!-- Add Exercise Sheet -->
+<div class="sheet-overlay" id="sheetOverlay"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <h2>添加动作</h2>
+
+  <div class="type-toggle" id="typeToggle">
+    <button class="type-option active" data-ex-type="strength">力量训练</button>
+    <button class="type-option" data-ex-type="cardio">有氧训练</button>
+  </div>
+
+  <!-- Strength Fields -->
+  <div id="strengthFields">
+    <div class="form-group">
+      <label class="form-label">训练部位</label>
+      <div class="part-select" id="partSelect"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">动作名称</label>
+      <input class="form-input" id="inputName" placeholder="例如：杠铃卧推" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">组数</label>
+        <input class="form-input" id="inputSets" type="number" min="1" value="3" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">次数</label>
+        <input class="form-input" id="inputReps" type="number" min="1" value="10" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">重量(kg)</label>
+        <input class="form-input" id="inputWeight" type="number" min="0" step="0.5" value="0" inputmode="decimal">
+      </div>
+    </div>
+  </div>
+
+  <!-- Cardio Fields -->
+  <div id="cardioFields" style="display:none">
+    <div class="form-group">
+      <label class="form-label">有氧类型</label>
+      <div class="part-select" id="cardioTypeSelect"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">名称（可选）</label>
+      <input class="form-input" id="inputCardioName" placeholder="默认使用类型名称" autocomplete="off">
+    </div>
+    <div class="form-row two-col">
+      <div class="form-group">
+        <label class="form-label">时长(分钟)</label>
+        <input class="form-input" id="inputDuration" type="number" min="1" value="30" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">距离(km)</label>
+        <input class="form-input" id="inputDistance" type="number" min="0" step="0.1" value="0" inputmode="decimal">
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo Upload -->
+  <div class="photo-area">
+    <button class="photo-btn" id="btnPhoto">📷 拍照 / 上传图片</button>
+    <div class="photo-preview" id="photoPreview">
+      <img id="photoImg" src="" alt="预览">
+      <button class="photo-remove" id="btnPhotoRemove">✕</button>
+    </div>
+  </div>
+
+  <button class="form-submit" id="btnSubmit">确认添加</button>
+</div>
+
+<!-- Day Detail Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<!-- Image Fullscreen -->
+<div class="img-fullscreen" id="imgFullscreen">
+  <img id="imgFullscreenImg" src="" alt="全屏图片">
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="fileInput" accept=".json" style="display:none">
+<input type="file" id="photoInput" accept="image/*" style="display:none">
+
+<script>
+(function() {
+  'use strict';
+
+  const BODY_PARTS = ['胸', '背', '腿', '肩', '手臂', '核心'];
+  const BODY_COLORS = { '胸':'#e91e63','背':'#ff9800','腿':'#ffeb3b','肩':'#2196f3','手臂':'#9c27b0','核心':'#4caf50' };
+  const BODY_EMOJI = { '胸':'🏋️','背':'🔙','腿':'🦵','肩':'💪','手臂':'🦾','核心':'🎯' };
+
+  const CARDIO_TYPES = ['跑步', '跳绳', '单车', '游泳', '椭圆机', '划船机', '其他'];
+  const CARDIO_EMOJI = { '跑步':'🏃', '跳绳':'🪢', '单车':'🚴', '游泳':'🏊', '椭圆机':'🔄', '划船机':'🚣', '其他':'💨' };
+
+  const THEMES = ['green', 'blue', 'purple', 'red', 'gold'];
+  const STORAGE_KEY = 'fitness_data';
+  const THEME_KEY = 'fitness_theme';
+  const MAX_IMG_WIDTH = 600;
+  const IMG_QUALITY = 0.6;
+
+  let data = { records: {}, plans: {} };
+  let activeView = 'viewToday';
+  let editingDate = null;
+  let calYear, calMonth;
+  let currentExType = 'strength';
+  let pendingImage = null; // base64 data URL of selected photo
+
+  // ==================== Helpers ====================
+
+  function todayStr() {
+    const d = new Date();
+    return ymd(d);
+  }
+
+  function ymd(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function fmtDate(dateStr) {
+    const [y,m,d] = dateStr.split('-');
+    return y + '年' + parseInt(m) + '月' + parseInt(d) + '日';
+  }
+
+  function fmtWeekday(dateStr) {
+    const d = new Date(dateStr);
+    return ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+  }
+
+  function genId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+  }
+
+  function toast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._tid);
+    el._tid = setTimeout(function() { el.classList.remove('show'); }, 1800);
+  }
+
+  // ==================== Splash ====================
+
+  function initSplash() {
+    var splash = document.getElementById('splash');
+    setTimeout(function() {
+      splash.classList.add('fade-out');
+      // Remove from DOM after transition
+      setTimeout(function() {
+        if (splash.parentNode) splash.parentNode.removeChild(splash);
+      }, 600);
+    }, 1200);
+  }
+
+  // ==================== Theme ====================
+
+  function loadTheme() {
+    try {
+      var saved = localStorage.getItem(THEME_KEY);
+      if (saved && THEMES.indexOf(saved) !== -1) {
+        document.documentElement.setAttribute('data-theme', saved);
+        return saved;
+      }
+    } catch(e) {}
+    return 'green';
+  }
+
+  function setTheme(name) {
+    document.documentElement.setAttribute('data-theme', name);
+    try { localStorage.setItem(THEME_KEY, name); } catch(e) {}
+    updateThemeDots();
+  }
+
+  function updateThemeDots() {
+    var current = document.documentElement.getAttribute('data-theme') || 'green';
+    var dots = document.querySelectorAll('#themeDots .theme-dot');
+    dots.forEach(function(dot) {
+      dot.classList.toggle('active', dot.dataset.theme === current);
+    });
+  }
+
+  // ==================== Image Resize ====================
+
+  function resizeImage(file) {
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement('canvas');
+          var w = img.width;
+          var h = img.height;
+          if (w > MAX_IMG_WIDTH) {
+            h = Math.round(h * (MAX_IMG_WIDTH / w));
+            w = MAX_IMG_WIDTH;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', IMG_QUALITY));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function showImagePreview(dataUrl) {
+    var preview = document.getElementById('photoPreview');
+    var img = document.getElementById('photoImg');
+    img.src = dataUrl;
+    preview.style.display = 'block';
+  }
+
+  function clearImagePreview() {
+    pendingImage = null;
+    var preview = document.getElementById('photoPreview');
+    preview.style.display = 'none';
+    document.getElementById('photoImg').src = '';
+    document.getElementById('photoInput').value = '';
+  }
+
+  // ==================== Data ====================
+
+  function loadData() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        data.records = parsed.records || {};
+        data.plans = parsed.plans || {};
+        normalizeData();
+      }
+    } catch (e) {
+      data = { records: {}, plans: {} };
+    }
+  }
+
+  function normalizeData() {
+    [data.records, data.plans].forEach(function(store) {
+      Object.keys(store).forEach(function(d) {
+        var entry = store[d];
+        if (entry.exercises) {
+          entry.exercises.forEach(function(e) {
+            if (!e.type) e.type = 'strength';
+            if (e.type === 'strength' && !e.restTimes) e.restTimes = [];
+            if (e.type === 'cardio' && !e.cardioType) e.cardioType = '其他';
+            if (e.type === 'cardio' && e.duration === undefined) e.duration = 0;
+            if (e.type === 'cardio' && e.distance === undefined) e.distance = 0;
+            // image field is optional, no normalization needed
+          });
+        }
+      });
+    });
+  }
+
+  function saveData() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      if (e.name === 'QuotaExceededError') {
+        toast('存储空间不足，请清理旧数据或导出后重置');
+      }
+    }
+  }
+
+  function getRecord(dateStr) {
+    return data.records[dateStr] || null;
+  }
+
+  function getPlan(dateStr) {
+    return data.plans[dateStr] || null;
+  }
+
+  function getExercises(dateStr) {
+    var rec = getRecord(dateStr);
+    if (rec) return rec.exercises;
+    var plan = getPlan(dateStr);
+    if (plan) return plan.exercises;
+    return [];
+  }
+
+  function isCompleted(dateStr) {
+    var rec = getRecord(dateStr);
+    return rec && rec.completed;
+  }
+
+  function ensureTodayRecord() {
+    var t = todayStr();
+    if (!data.records[t]) {
+      var plan = data.plans[t];
+      data.records[t] = {
+        exercises: plan ? JSON.parse(JSON.stringify(plan.exercises)) : [],
+        completed: false
+      };
+      if (plan) delete data.plans[t];
+    }
+    return data.records[t];
+  }
+
+  // ==================== Export / Import ====================
+
+  function exportData() {
+    var json = JSON.stringify(data, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'fitness_backup_' + todayStr() + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('数据已导出');
+  }
+
+  function importData(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var parsed = JSON.parse(e.target.result);
+        if (parsed.records && parsed.plans) {
+          data = parsed;
+          normalizeData();
+          saveData();
+          refreshAll();
+          toast('数据导入成功');
+        } else {
+          toast('无效的数据文件');
+        }
+      } catch (err) {
+        toast('文件解析失败');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ==================== Today Tab ====================
+
+  function renderExerciseCard(e, i) {
+    var exType = e.type || 'strength';
+    if (exType === 'cardio') return renderCardioCard(e, i);
+    return renderStrengthCard(e, i);
+  }
+
+  function renderCardioCard(e, i) {
+    var cType = e.cardioType || '其他';
+    var name = e.name || cType;
+    var badgeHtml;
+    if (e.image) {
+      badgeHtml = '<div class="part-badge" style="color:#64b5f6"><img src="' + e.image + '" alt=""></div>';
+    } else {
+      badgeHtml = '<div class="part-badge" style="color:#64b5f6">' + (CARDIO_EMOJI[cType] || '💨') + '</div>';
+    }
+    var imgIndicator = e.image ? ' <span class="photo-indicator">📷</span>' : '';
+    return '<div class="exercise-card cardio">' +
+      badgeHtml +
+      '<div class="exercise-info">' +
+        '<div class="exercise-name">' + esc(name) + imgIndicator + '</div>' +
+        '<div class="exercise-detail">有氧 · ' + (e.duration || 0) + '分钟' +
+          (e.distance > 0 ? ' · ' + e.distance + 'km' : '') +
+        '</div>' +
+      '</div>' +
+      '<button class="exercise-del" data-idx="' + i + '" aria-label="删除">✕</button>' +
+    '</div>';
+  }
+
+  function renderStrengthCard(e, i) {
+    var restTimes = e.restTimes || [];
+    var sets = e.sets || 0;
+    var avgRestStr = '';
+
+    if (restTimes.length > 0) {
+      var totalRest = 0;
+      for (var r = 0; r < restTimes.length; r++) totalRest += restTimes[r];
+      var avgSec = Math.round(totalRest / restTimes.length);
+      if (avgSec >= 60) {
+        avgRestStr = ' · 间歇~' + Math.round(avgSec / 60 * 10) / 10 + 'min';
+      } else {
+        avgRestStr = ' · 间歇~' + avgSec + 's';
+      }
+    }
+
+    var restHtml = '';
+    if (sets > 1) {
+      var inputs = '';
+      for (var s = 0; s < sets - 1; s++) {
+        var val = (restTimes[s] !== undefined && restTimes[s] !== null) ? restTimes[s] : '';
+        inputs += '<span class="rest-set-num">' + (s + 1) + '→' + (s + 2) + '</span>' +
+          '<input class="rest-input" data-idx="' + i + '" data-set="' + s +
+          '" type="number" min="0" max="999" value="' + val +
+          '" placeholder="--" inputmode="numeric">';
+      }
+      restHtml = '<div class="rest-row">' +
+        '<span class="rest-label">组间歇:</span>' + inputs + '<span class="rest-unit">秒</span>' +
+        '</div>';
+    }
+
+    var badgeHtml;
+    if (e.image) {
+      badgeHtml = '<div class="part-badge" style="background:' + (BODY_COLORS[e.bodyPart] || '#444') + '33;color:' + (BODY_COLORS[e.bodyPart] || '#fff') + '"><img src="' + e.image + '" alt="" style="width:100%;height:100%;object-fit:cover"></div>';
+    } else {
+      badgeHtml = '<div class="part-badge" style="background:' + (BODY_COLORS[e.bodyPart] || '#444') + '33;color:' + (BODY_COLORS[e.bodyPart] || '#fff') + '">' +
+        (BODY_EMOJI[e.bodyPart] || '🏃') + '</div>';
+    }
+    var imgIndicator = e.image ? ' <span class="photo-indicator">📷</span>' : '';
+
+    return '<div class="exercise-card">' +
+      badgeHtml +
+      '<div class="exercise-info">' +
+        '<div class="exercise-name">' + esc(e.name) + imgIndicator + '</div>' +
+        '<div class="exercise-detail">' + esc(e.bodyPart) + ' · ' + sets + '组 × ' + e.reps + '次' +
+          (e.weight > 0 ? ' · ' + e.weight + 'kg' : '') + avgRestStr +
+        '</div>' +
+        restHtml +
+      '</div>' +
+      '<button class="exercise-del" data-idx="' + i + '" aria-label="删除">✕</button>' +
+    '</div>';
+  }
+
+  function renderToday() {
+    var t = todayStr();
+    document.getElementById('todayDate').textContent = fmtDate(t) + ' ' + fmtWeekday(t);
+    document.getElementById('headerDate').textContent = fmtDate(t);
+
+    var record = getRecord(t);
+    var completed = record && record.completed;
+    var planBanner = document.getElementById('planBanner');
+    var completedBadge = document.getElementById('completedBadge');
+    var exerciseList = document.getElementById('exerciseList');
+    var btnAdd = document.getElementById('btnAdd');
+    var btnComplete = document.getElementById('btnComplete');
+
+    planBanner.style.display = (!record && getPlan(t)) ? 'flex' : 'none';
+    if (!record && getPlan(t)) {
+      ensureTodayRecord();
+      saveData();
+    }
+
+    record = getRecord(t);
+    completed = record && record.completed;
+    var exercises = record ? record.exercises : getExercises(t);
+
+    completedBadge.style.display = completed ? 'flex' : 'none';
+
+    if (exercises.length === 0) {
+      exerciseList.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:30px 0;font-size:14px">暂无训练动作<br>点击下方按钮添加</div>';
+    } else {
+      exerciseList.innerHTML = exercises.map(function(e, i) {
+        return renderExerciseCard(e, i);
+      }).join('');
+    }
+
+    btnAdd.style.display = 'flex';
+    if (completed) {
+      btnComplete.style.display = 'none';
+    } else {
+      btnComplete.style.display = 'block';
+      btnComplete.disabled = (exercises.length === 0);
+    }
+
+    closeSheet();
+  }
+
+  function esc(s) {
+    var map = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' };
+    return String(s).replace(/[&<>"']/g, function(c) { return map[c]; });
+  }
+
+  // ==================== Calendar Tab ====================
+
+  function daysInMonth(y, m) { return new Date(y, m+1, 0).getDate(); }
+  function firstDayOfMonth(y, m) { return new Date(y, m, 1).getDay(); }
+
+  function getDayStatus(dateStr) {
+    var rec = getRecord(dateStr);
+    var plan = getPlan(dateStr);
+    if (rec && rec.completed) return 'trained';
+    if (plan) return 'planned';
+    return 'rest';
+  }
+
+  function renderCalendar() {
+    var grid = document.getElementById('calGrid');
+    var label = document.getElementById('calLabel');
+    label.textContent = calYear + '年 ' + (calMonth + 1) + '月';
+
+    var days = daysInMonth(calYear, calMonth);
+    var firstDay = firstDayOfMonth(calYear, calMonth);
+    var today = todayStr();
+
+    var html = '';
+    for (var i = 0; i < firstDay; i++) {
+      html += '<div class="cal-day empty"></div>';
+    }
+    for (var d = 1; d <= days; d++) {
+      var ds = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      var status = getDayStatus(ds);
+      var isToday = ds === today;
+      var cls = 'cal-day ' + status;
+      if (isToday) cls += ' today';
+      html += '<button class="' + cls + '" data-date="' + ds + '">' + d + '</button>';
+    }
+    grid.innerHTML = html;
+  }
+
+  function showDayDetail(dateStr) {
+    var modalOverlay = document.getElementById('modalOverlay');
+    var modal = document.getElementById('modal');
+    var rec = getRecord(dateStr);
+    var plan = getPlan(dateStr);
+    var exercises = rec ? rec.exercises : (plan ? plan.exercises : []);
+    var completed = rec && rec.completed;
+    var isFuture = dateStr > todayStr();
+    var isToday = dateStr === todayStr();
+
+    var title = fmtDate(dateStr) + ' ' + fmtWeekday(dateStr);
+    var statusTag = '';
+    if (completed) statusTag = ' <span style="color:var(--green);font-size:13px">✅ 已完成</span>';
+    else if (plan && (isFuture || isToday)) statusTag = ' <span style="color:var(--blue);font-size:13px">📋 计划中</span>';
+    else if (!rec && !plan) statusTag = ' <span style="color:var(--text-secondary);font-size:13px">休息日</span>';
+
+    var body = '';
+    if (exercises.length === 0) {
+      body = '<div class="modal-empty">当天无训练记录</div>';
+    } else {
+      body = exercises.map(function(e, i) {
+        var exType = e.type || 'strength';
+        var imgHtml = '';
+        if (e.image) {
+          imgHtml = '<img class="modal-exercise-img" src="' + e.image + '" data-img-idx="' + i + '" alt="动作照片" onclick="event.stopPropagation();window._viewImage && window._viewImage(this.src)">';
+        }
+        if (exType === 'cardio') {
+          var cType = e.cardioType || '其他';
+          return '<div class="modal-exercise">' +
+            '<div class="modal-exercise-name"><span style="color:#64b5f6;font-weight:600">' + (CARDIO_EMOJI[cType] || '💨') + ' 有氧</span> ' + esc(e.name || cType) + '</div>' +
+            '<div class="modal-exercise-detail">' + (e.duration || 0) + '分钟' + (e.distance > 0 ? ' · ' + e.distance + 'km' : '') + '</div>' +
+            imgHtml +
+          '</div>';
+        }
+        // Strength
+        var restInfo = '';
+        var rt = e.restTimes || [];
+        if (rt.length > 0) {
+          var parts = [];
+          for (var ri = 0; ri < rt.length; ri++) {
+            parts.push('第' + (ri+1) + '组后休息' + rt[ri] + '秒');
+          }
+          restInfo = '<div class="modal-exercise-detail">组间歇: ' + parts.join('、') + '</div>';
+        }
+        return '<div class="modal-exercise">' +
+          '<div class="modal-exercise-name"><span style="color:' + (BODY_COLORS[e.bodyPart] || '#fff') + ';font-weight:600">' + esc(e.bodyPart) + '</span> ' + esc(e.name) + '</div>' +
+          '<div class="modal-exercise-detail">' + e.sets + '组 × ' + e.reps + '次' + (e.weight > 0 ? ' · ' + e.weight + 'kg' : '') + '</div>' +
+          restInfo +
+          imgHtml +
+        '</div>';
+      }).join('');
+    }
+
+    var actions = '';
+    if (isToday && !completed) {
+      actions = '<button class="form-submit" id="modalGoToday" style="margin-top:12px">前往今日编辑</button>';
+    } else if (isFuture && plan) {
+      actions = '<button class="form-submit" id="modalEditPlan" style="margin-top:12px;background:var(--blue)">编辑计划</button>' +
+                '<button class="data-btn" id="modalDelPlan" style="margin-top:8px;width:100%;color:var(--danger)">删除此计划</button>';
+    } else if (isFuture && !plan) {
+      actions = '<button class="form-submit" id="modalAddPlan" style="margin-top:12px;background:var(--blue)">为此日添加计划</button>';
+    }
+
+    modal.innerHTML = '<h3>' + title + statusTag + '</h3>' + body + actions +
+      '<button class="modal-close" id="modalClose">关闭</button>';
+
+    modalOverlay.classList.add('open');
+
+    document.getElementById('modalClose').onclick = function() { modalOverlay.classList.remove('open'); };
+    modalOverlay.onclick = function(e) { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); };
+
+    if (isToday && !completed) {
+      document.getElementById('modalGoToday').onclick = function() {
+        modalOverlay.classList.remove('open');
+        switchTab('viewToday');
+      };
+    }
+    if (isFuture && plan) {
+      document.getElementById('modalEditPlan').onclick = function() {
+        modalOverlay.classList.remove('open');
+        editingDate = dateStr;
+        ensurePlanRecord(dateStr);
+        openSheet(dateStr);
+      };
+      document.getElementById('modalDelPlan').onclick = function() {
+        delete data.plans[dateStr];
+        saveData();
+        modalOverlay.classList.remove('open');
+        renderCalendar();
+        toast('计划已删除');
+      };
+    }
+    if (isFuture && !plan) {
+      document.getElementById('modalAddPlan').onclick = function() {
+        modalOverlay.classList.remove('open');
+        editingDate = dateStr;
+        ensurePlanRecord(dateStr);
+        openSheet(dateStr);
+      };
+    }
+  }
+
+  function ensurePlanRecord(dateStr) {
+    if (!data.plans[dateStr]) {
+      data.plans[dateStr] = { exercises: [] };
+    }
+    saveData();
+  }
+
+  // ==================== Image Viewer ====================
+
+  function viewImage(src) {
+    var fs = document.getElementById('imgFullscreen');
+    var img = document.getElementById('imgFullscreenImg');
+    img.src = src;
+    fs.classList.add('open');
+  }
+
+  function closeImageViewer() {
+    document.getElementById('imgFullscreen').classList.remove('open');
+  }
+
+  // ==================== Stats Tab ====================
+
+  function renderStats() {
+    var today = todayStr();
+    var ty = parseInt(today.split('-')[0]);
+    var tm = parseInt(today.split('-')[1]);
+
+    var totalDays = 0;
+    var monthDays = 0;
+    var cardioCount = 0;
+    var cardioDuration = 0;
+    var cardioDistance = 0;
+
+    for (var d in data.records) {
+      if (data.records[d].completed) {
+        totalDays++;
+        var parts = d.split('-');
+        var y = parseInt(parts[0]);
+        var m = parseInt(parts[1]);
+        if (y === ty && m === tm) {
+          monthDays++;
+          var exs = data.records[d].exercises || [];
+          for (var ei = 0; ei < exs.length; ei++) {
+            var ex = exs[ei];
+            if ((ex.type || 'strength') === 'cardio') {
+              cardioCount++;
+              cardioDuration += (ex.duration || 0);
+              cardioDistance += (ex.distance || 0);
+            }
+          }
+        }
+      }
+    }
+
+    var streak = 0;
+    var cursor = new Date(ty, tm-1, parseInt(today.split('-')[2]));
+    if (!isCompleted(today)) {
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    while (true) {
+      var ds = ymd(cursor);
+      if (isCompleted(ds)) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    document.getElementById('statTotal').textContent = totalDays;
+    document.getElementById('statMonth').textContent = monthDays;
+    document.getElementById('statStreak').textContent = streak;
+    document.getElementById('cardioCount').textContent = cardioCount;
+    document.getElementById('cardioDuration').textContent = cardioDuration;
+    document.getElementById('cardioDistance').textContent = Math.round(cardioDistance * 10) / 10;
+
+    var now = new Date();
+    var dayOfWeek = now.getDay();
+    var monday = new Date(now);
+    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+
+    var weekLabels = ['一','二','三','四','五','六','日'];
+    var weekHtml = '';
+    for (var i = 0; i < 7; i++) {
+      var wd = new Date(monday);
+      wd.setDate(monday.getDate() + i);
+      var wds = ymd(wd);
+      var done = isCompleted(wds);
+      var isToday = wds === today;
+      weekHtml += '<div class="week-day">' +
+        '<div class="day-label" style="' + (isToday ? 'color:var(--accent);font-weight:700' : '') + '">' + weekLabels[i] + '</div>' +
+        '<div class="day-icon" style="color:' + (done ? 'var(--green)' : 'var(--text-secondary)') + '">' +
+          (done ? '✓' : '—') +
+        '</div>' +
+      '</div>';
+    }
+    document.getElementById('weekRow').innerHTML = weekHtml;
+    updateThemeDots();
+  }
+
+  // ==================== Sheet ====================
+
+  function resetSheetForm() {
+    currentExType = 'strength';
+    document.getElementById('inputName').value = '';
+    document.getElementById('inputSets').value = '3';
+    document.getElementById('inputReps').value = '10';
+    document.getElementById('inputWeight').value = '0';
+    document.getElementById('inputCardioName').value = '';
+    document.getElementById('inputDuration').value = '30';
+    document.getElementById('inputDistance').value = '0';
+    clearImagePreview();
+
+    var toggle = document.getElementById('typeToggle');
+    toggle.querySelectorAll('.type-option').forEach(function(b) { b.classList.remove('active'); });
+    toggle.querySelector('[data-ex-type="strength"]').classList.add('active');
+
+    document.getElementById('strengthFields').style.display = 'block';
+    document.getElementById('cardioFields').style.display = 'none';
+
+    var partSelect = document.getElementById('partSelect');
+    partSelect.innerHTML = BODY_PARTS.map(function(p) {
+      return '<button class="part-option" data-part="' + p + '" style="color:' + BODY_COLORS[p] + '">' + p + '</button>';
+    }).join('');
+    partSelect.querySelectorAll('.part-option').forEach(function(b) { b.classList.remove('selected'); });
+
+    var cardioSelect = document.getElementById('cardioTypeSelect');
+    cardioSelect.innerHTML = CARDIO_TYPES.map(function(ct) {
+      return '<button class="part-option" data-cardio="' + ct + '" style="color:#64b5f6">' + (CARDIO_EMOJI[ct] || '') + ' ' + ct + '</button>';
+    }).join('');
+    cardioSelect.querySelectorAll('.part-option').forEach(function(b) { b.classList.remove('selected'); });
+  }
+
+  function openSheet(dateStr) {
+    resetSheetForm();
+    var sheet = document.getElementById('sheet');
+    var sheetOverlay = document.getElementById('sheetOverlay');
+    sheetOverlay.classList.add('open');
+    sheet.classList.add('open');
+  }
+
+  function closeSheet() {
+    document.getElementById('sheet').classList.remove('open');
+    document.getElementById('sheetOverlay').classList.remove('open');
+  }
+
+  // ==================== Tab Switching ====================
+
+  function switchTab(viewId) {
+    document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+    document.getElementById(viewId).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+    document.querySelector('[data-view="' + viewId + '"]').classList.add('active');
+    activeView = viewId;
+
+    if (viewId === 'viewToday') renderToday();
+    if (viewId === 'viewCalendar') renderCalendar();
+    if (viewId === 'viewStats') renderStats();
+  }
+
+  function refreshAll() {
+    renderToday();
+    renderCalendar();
+    renderStats();
+  }
+
+  // ==================== Init & Events ====================
+
+  function init() {
+    loadTheme();
+    loadData();
+    initSplash();
+
+    var now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    editingDate = todayStr();
+
+    // Expose image viewer globally for modal inline onclick
+    window._viewImage = viewImage;
+
+    renderToday();
+    renderCalendar();
+    renderStats();
+
+    // Bottom nav
+    document.querySelectorAll('.nav-item').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        switchTab(this.dataset.view);
+      });
+    });
+
+    // Add exercise button
+    document.getElementById('btnAdd').addEventListener('click', function() {
+      editingDate = todayStr();
+      var rec = ensureTodayRecord();
+      if (rec.completed) {
+        rec.completed = false;
+        saveData();
+        renderToday();
+        toast('训练已重新打开，可继续添加动作');
+      } else {
+        saveData();
+      }
+      openSheet();
+    });
+
+    // Complete training button
+    document.getElementById('btnComplete').addEventListener('click', function() {
+      var t = todayStr();
+      var rec = getRecord(t);
+      if (!rec || rec.exercises.length === 0) return;
+      rec.completed = true;
+      saveData();
+      refreshAll();
+      toast('🎉 训练完成！');
+    });
+
+    // Sheet overlay close
+    document.getElementById('sheetOverlay').addEventListener('click', closeSheet);
+
+    // Type toggle
+    document.getElementById('typeToggle').addEventListener('click', function(e) {
+      if (e.target.classList.contains('type-option')) {
+        this.querySelectorAll('.type-option').forEach(function(b) { b.classList.remove('active'); });
+        e.target.classList.add('active');
+        currentExType = e.target.dataset.exType;
+        document.getElementById('strengthFields').style.display = (currentExType === 'strength') ? 'block' : 'none';
+        document.getElementById('cardioFields').style.display = (currentExType === 'cardio') ? 'block' : 'none';
+      }
+    });
+
+    // Photo button
+    document.getElementById('btnPhoto').addEventListener('click', function() {
+      document.getElementById('photoInput').click();
+    });
+
+    // Photo input change
+    document.getElementById('photoInput').addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        var file = this.files[0];
+        // Validate file size before resizing (warn if > 20MB)
+        if (file.size > 20 * 1024 * 1024) {
+          toast('图片过大，请选择小于20MB的图片');
+          this.value = '';
+          return;
+        }
+        resizeImage(file).then(function(dataUrl) {
+          pendingImage = dataUrl;
+          showImagePreview(dataUrl);
+        }).catch(function() {
+          toast('图片处理失败，请重试');
+        });
+      }
+    });
+
+    // Photo remove
+    document.getElementById('btnPhotoRemove').addEventListener('click', function(e) {
+      e.stopPropagation();
+      clearImagePreview();
+    });
+
+    // Submit exercise
+    document.getElementById('btnSubmit').addEventListener('click', function() {
+      if (currentExType === 'strength') {
+        submitStrengthExercise();
+      } else {
+        submitCardioExercise();
+      }
+    });
+
+    function submitStrengthExercise() {
+      var name = document.getElementById('inputName').value.trim();
+      var sets = parseInt(document.getElementById('inputSets').value) || 0;
+      var reps = parseInt(document.getElementById('inputReps').value) || 0;
+      var weight = parseFloat(document.getElementById('inputWeight').value) || 0;
+
+      if (!name) { toast('请输入动作名称'); return; }
+      if (sets < 1 || reps < 1) { toast('组数和次数至少为1'); return; }
+
+      var selected = document.querySelector('#partSelect .part-option.selected');
+      if (!selected) { toast('请选择训练部位'); return; }
+      var bodyPart = selected.dataset.part;
+
+      var exercise = {
+        id: genId(),
+        type: 'strength',
+        name: name,
+        bodyPart: bodyPart,
+        sets: sets,
+        reps: reps,
+        weight: weight,
+        restTimes: []
+      };
+      if (pendingImage) exercise.image = pendingImage;
+
+      addExerciseToTarget(exercise);
+    }
+
+    function submitCardioExercise() {
+      var duration = parseInt(document.getElementById('inputDuration').value) || 0;
+      var distance = parseFloat(document.getElementById('inputDistance').value) || 0;
+
+      if (duration < 1) { toast('请输入有效时长'); return; }
+
+      var selected = document.querySelector('#cardioTypeSelect .part-option.selected');
+      if (!selected) { toast('请选择有氧类型'); return; }
+      var cardioType = selected.dataset.cardio;
+
+      var name = document.getElementById('inputCardioName').value.trim();
+      if (!name) name = cardioType;
+
+      var exercise = {
+        id: genId(),
+        type: 'cardio',
+        name: name,
+        cardioType: cardioType,
+        duration: duration,
+        distance: distance
+      };
+      if (pendingImage) exercise.image = pendingImage;
+
+      addExerciseToTarget(exercise);
+    }
+
+    function addExerciseToTarget(exercise) {
+      var target = editingDate === todayStr() ? data.records[editingDate] : data.plans[editingDate];
+      if (!target) {
+        if (editingDate === todayStr()) ensureTodayRecord();
+        else { data.plans[editingDate] = { exercises: [] }; }
+      }
+      var tgt = editingDate === todayStr() ? data.records[editingDate] : data.plans[editingDate];
+      tgt.exercises.push(exercise);
+      saveData();
+      clearImagePreview();
+      closeSheet();
+      refreshAll();
+      toast('动作已添加');
+    }
+
+    // Part selector delegation
+    document.getElementById('partSelect').addEventListener('click', function(e) {
+      if (e.target.classList.contains('part-option')) {
+        this.querySelectorAll('.part-option').forEach(function(b) { b.classList.remove('selected'); });
+        e.target.classList.add('selected');
+      }
+    });
+
+    // Cardio type selector delegation
+    document.getElementById('cardioTypeSelect').addEventListener('click', function(e) {
+      if (e.target.classList.contains('part-option')) {
+        this.querySelectorAll('.part-option').forEach(function(b) { b.classList.remove('selected'); });
+        e.target.classList.add('selected');
+      }
+    });
+
+    // Exercise list delegation (delete)
+    document.getElementById('exerciseList').addEventListener('click', function(e) {
+      if (e.target.classList.contains('exercise-del') || e.target.closest('.exercise-del')) {
+        var btn = e.target.classList.contains('exercise-del') ? e.target : e.target.closest('.exercise-del');
+        var idx = parseInt(btn.dataset.idx);
+        var t = todayStr();
+        var rec = getRecord(t);
+        if (rec && rec.exercises[idx] !== undefined) {
+          rec.exercises.splice(idx, 1);
+          if (rec.exercises.length === 0 && !rec.completed) {
+            delete data.records[t];
+          }
+          saveData();
+          refreshAll();
+        }
+      }
+    });
+
+    // Rest time input changes
+    document.getElementById('exerciseList').addEventListener('change', function(e) {
+      if (e.target.classList.contains('rest-input')) {
+        var idx = parseInt(e.target.dataset.idx);
+        var setIdx = parseInt(e.target.dataset.set);
+        var val = parseInt(e.target.value) || 0;
+        var t = todayStr();
+        var rec = getRecord(t);
+        if (rec && rec.exercises[idx]) {
+          var ex = rec.exercises[idx];
+          if (!ex.restTimes) ex.restTimes = [];
+          ex.restTimes[setIdx] = val;
+          while (ex.restTimes.length > 0 && (ex.restTimes[ex.restTimes.length - 1] === undefined || ex.restTimes[ex.restTimes.length - 1] === null)) {
+            ex.restTimes.pop();
+          }
+          saveData();
+          renderToday();
+        }
+      }
+    });
+
+    // Calendar navigation
+    document.getElementById('calPrev').addEventListener('click', function() {
+      if (calMonth === 0) { calYear--; calMonth = 11; }
+      else calMonth--;
+      renderCalendar();
+    });
+    document.getElementById('calNext').addEventListener('click', function() {
+      if (calMonth === 11) { calYear++; calMonth = 0; }
+      else calMonth++;
+      renderCalendar();
+    });
+
+    // Calendar day click
+    document.getElementById('calGrid').addEventListener('click', function(e) {
+      var btn = e.target.closest('.cal-day');
+      if (!btn || btn.classList.contains('empty')) return;
+      showDayDetail(btn.dataset.date);
+    });
+
+    // Theme dots
+    document.getElementById('themeDots').addEventListener('click', function(e) {
+      var dot = e.target.closest('.theme-dot');
+      if (!dot) return;
+      setTheme(dot.dataset.theme);
+    });
+
+    // Image fullscreen close
+    document.getElementById('imgFullscreen').addEventListener('click', closeImageViewer);
+
+    // Export
+    document.getElementById('btnExport').addEventListener('click', exportData);
+    document.getElementById('btnExport2').addEventListener('click', exportData);
+
+    // Import
+    function triggerImport() {
+      document.getElementById('fileInput').click();
+    }
+    document.getElementById('btnImport').addEventListener('click', triggerImport);
+    document.getElementById('btnImport2').addEventListener('click', triggerImport);
+    document.getElementById('fileInput').addEventListener('change', function() {
+      if (this.files[0]) importData(this.files[0]);
+      this.value = '';
+    });
+
+    // Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeSheet();
+        document.getElementById('modalOverlay').classList.remove('open');
+        closeImageViewer();
+      }
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
